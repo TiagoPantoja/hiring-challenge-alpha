@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Query, Param, Body, HttpException, HttpS
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam, ApiBody } from '@nestjs/swagger';
 import { HistoryService } from './history.service';
 import type { HistoryEntry, HistoryStats } from './history.service';
-import { ExportHistoryDto } from './dto/export-history.dto';
+import { ExportHistoryDto } from '../tools/dto/export-history.dto';
 
 @ApiTags('history')
 @Controller('history')
