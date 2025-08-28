@@ -1,84 +1,232 @@
-# Multi-Source AI Agent Challenge
+#  Multi-Source AI Agent API
 
-## Challenge Overview
+Uma API REST que responde perguntas consultando bancos de dados SQLite, documentos de texto e comandos Bash. 
 
-Welcome to the Multi-Source AI Agent Challenge! In this project, you'll build an intelligent agent using Node.js and modern LLM frameworks that can answer questions by leveraging multiple data sources including SQLite databases, document files, and web content via bash commands.
+## O que o projeto faz?
 
-## Challenge Requirements
+- **Consulta banco de dados** para encontrar informações
+- **Busca em documentos** para responder perguntas
+- **Executa comandos Bash** para obter dados do sistema
+- **Escolhe** a melhor fonte de informação
+- **Conversa naturalmente** através de uma API REST ou WebSocket
 
-### Technology Stack
-- Node.js
-- [LangChain](https://js.langchain.com/docs/) - For LLM integration and chains
-- [LangGraph](https://js.langchain.com/docs/langgraph/) - For agent workflow orchestration
+## Pré-requisitos
+- Node.js 18
+- Chave API OpenAI
+- Docker
 
-### Core Features
-Your AI agent must be able to:
+### Instalação Rápida
 
-1. **Answer questions using multiple data sources:**
-   - **SQLite databases**: The agent should query `.db` files placed in the `data/sqlite` folder
-   - **Document context**: The agent should extract information from `.txt` files in the `data/documents` folder
-   - **External data**: The agent should be able to run bash commands (with user approval) to gather additional data (e.g., using `curl` to fetch web content)
+1. **Clone o projeto**
+```bash
+git clone https://github.com/TiagoPantoja/hiring-challenge-alpha.git
+cd hiring-challenge-alpha
+```
 
-2. **Implement a conversational interface** - either in the browser or terminal
+2. **Configure a chave API OpenAI**
+```bash
+cp .env.example .env
+```
 
-3. **Provide intelligent routing** - decide which data source is most appropriate for each question and use the right tools accordingly
+Edite o arquivo .env e adicione sua chave da OpenAI:
 
-### Minimum Viable Product
-Your solution must demonstrate:
+```bash
+OPENAI_API_KEY=sk-sua-chave-aqui
+OPENAI_MODEL=gpt-4o-mini
+ENABLE_BASH_COMMANDS=true
+```
 
-- A functional agent that can respond to user questions
-- Proper routing between different data sources
-- A clear execution flow with user approval for bash commands
-- Meaningful responses that integrate information from multiple sources when needed
+3. **Execute com Docker**
+```bash
+docker-compose up --build
+```
 
-## Submission Guidelines
+ou execute localmente:
 
-1. Fork this repository
-2. Implement your solution
-3. Submit a pull request with your implementation
-4. Include detailed instructions on how to run and test your solution
-5. Your code must be 100% functional
+```bash
+npm install
+npm run start:dev
+```
 
-## Evaluation Criteria
+4. **Teste se está funcionando**
+```bash
+curl http://localhost:3000/api/v1/agent/health
+```
 
-Your submission will be evaluated based on:
+## Usando a API
 
-- **Functionality**: Does it work as expected? Can it correctly use all three data sources?
-- **Code Quality**: Is the code well-organized, commented, and following best practices?
-- **Error Handling**: How does the agent handle edge cases and errors?
-- **User Experience**: Is the conversation with the agent natural and helpful?
-- **Documentation**: Is the setup and usage well documented?
+**Documentação Swagger**
 
-## Setup Instructions
+Acesse: http://localhost:3000/api/docs
 
-Include detailed instructions on how to set up and run your solution. For example:
+**Endpoints Principais**
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Configure environment variables (copy `.env.example` to `.env` and fill in required values)
-4. Add sample databases to the `sqlite` folder
-5. Add sample documents to the `documents` folder
-6. Start the agent: `npm start`
+1. **Fazer uma Pergunta**
+```bash
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "O que você sabe sobre Adam Smith?"
+  }'
+```
 
-## Testing Your Implementation
+**Resposta**:
+```json
+{
+  "answer": "Adam Smith foi um economista escocês...",
+  "success": true,
+  "duration": 2500,
+  "timestamp": "2024-01-01T12:00:00.000Z"
+}
+```
 
-Your README should include instructions on how to test the agent functionality, such as:
+2. **Verificar Estatísticas**
+```bash
+curl http://localhost:3000/api/v1/agent/stats
+```
 
-1. Sample questions that query SQLite databases
-2. Sample questions that require document context
-3. Sample questions that would trigger bash commands (and how to approve them)
-4. Examples of questions that combine multiple data sources
+**Resposta**:
+```json
+{
+  "sqlite": {
+    "count": 2,
+    "databases": ["vendas.db", "clientes.db"]
+  },
+  "documents": {
+    "count": 3,
+    "files": ["manual.txt", "faq.md", "politicas.txt"]
+  },
+  "bash": {
+    "enabled": true
+  }
+}
+```
 
-## Resources
+**3. Obter Sugestões**
+```bash
+curl http://localhost:3000/api/v1/agent/suggestions
+```
 
-- [LangChain JS Documentation](https://js.langchain.com/docs/)
-- [LangGraph Documentation](https://js.langchain.com/docs/langgraph/)
-- [SQLite in Node.js Guide](https://www.sqlitetutorial.net/sqlite-nodejs/)
+**Resposta**:
+```json
+{
+  "suggestions": [
+    "Quem é Adam Smith?",
+    "Qual é a política de devolução?",
+    "Quantos clientes temos no banco de dados?"
+  ]
+}
+```
 
-## License
+### Exemplos de Perguntas
+**Para Documentos**
+```bash
+# Buscar informações específicas
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Qual é a política de férias da empresa?"}'
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+# Buscar por pessoa ou conceito
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Me fale sobre economia clássica"}'
+```
 
----
+**Para Banco de Dados**
+```bash
+# Explorar estrutura
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Que tabelas existem no banco vendas.db?"}'
 
-Good luck with your implementation! We're excited to see your creative solutions to this challenge.
+# Consultar dados
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Quantos clientes temos cadastrados?"}'
+
+# Análises
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Quais foram as vendas do último mês?"}'
+```
+
+**Para Comandos Bash**
+```bash
+# Informações do sistema
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Qual é a data e hora atual?"}'
+```
+
+### Histórico de Conversas (feature adicional)
+
+**Ver Histórico**
+```bash
+curl "http://localhost:3000/api/v1/history?limit=5"
+```
+
+**Buscar no Histórico**
+```bash
+curl http://localhost:3000/api/v1/history/stats
+```
+
+**Estatísticas do Histórico**
+```bash
+curl http://localhost:3000/api/v1/history/stats
+```
+
+### Chat em Tempo Real com WebSocket (feature adicional)
+
+**Conectar via JavaScript**
+```javascript
+const socket = io('http://localhost:3000');
+
+// Conectar
+socket.on('welcome', (data) => {
+  console.log('Conectado:', data.message);
+});
+
+// Enviar pergunta
+socket.emit('chat_message', {
+  query: 'O que você sabe sobre economia?'
+});
+
+// Receber resposta
+socket.on('chat_response', (response) => {
+  console.log('Resposta:', response.answer);
+});
+```
+
+### Configurações de Segurança
+```bash
+# Desabilitar comandos bash
+ENABLE_BASH_COMMANDS=false
+
+# Configurar CORS
+CORS_ORIGINS=http://localhost:3000,https://meusite.com
+
+# Rate limiting
+ENABLE_RATE_LIMITING=true
+RATE_LIMIT_MAX=60
+```
+
+### Configurações de Performance
+```bash 
+# Temperatura (0.0 = mais determinístico, 1.0 = mais criativo)
+OPENAI_TEMPERATURE=0.1
+
+# Máximo de tokens por resposta
+OPENAI_MAX_TOKENS=1500
+
+# Cache de respostas
+ENABLE_RESPONSE_CACHE=true
+CACHE_TTL=300
+```
+
+### Docker (feature adicional)
+
+**API REST**
+```bash
+docker build -t ai-agent-api .
+docker run -p 3000:3000 --env-file .env ai-agent-api
+```
