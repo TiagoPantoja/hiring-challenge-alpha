@@ -1,98 +1,234 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+#  Multi-Source AI Agent API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Uma API REST que responde perguntas consultando bancos de dados SQLite, documentos de texto e comandos Bash. 
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## O que o projeto faz?
 
-## Description
+- **Consulta banco de dados** para encontrar informações
+- **Busca em documentos** para responder perguntas
+- **Executa comandos Bash** para obter dados do sistema
+- **Escolhe** a melhor fonte de informação
+- **Conversa naturalmente** através de uma API REST ou WebSocket
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Pré-requisitos
+- Node.js 18
+- Chave API OpenAI
+- Docker
 
-## Project setup
+### Instalação Rápida
 
+1. **Clone o projeto**
 ```bash
-$ npm install
+git clone https://github.com/TiagoPantoja/hiring-challenge-alpha.git
+cd hiring-challenge-alpha
 ```
 
-## Compile and run the project
-
+2. **Configure a chave API OpenAI**
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+Edite o arquivo .env e adicione sua chave da OpenAI:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+OPENAI_API_KEY=sk-sua-chave-aqui
+OPENAI_MODEL=gpt-4o-mini
+ENABLE_BASH_COMMANDS=true
 ```
 
-## Deployment
+3. **Execute com Docker**
+```bash
+docker-compose up --build
+```
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+ou execute localmente:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+4. **Teste se está funcionando**
+```bash
+curl http://localhost:3000/api/v1/agent/health
+```
 
-## Resources
+## Usando a API
 
-Check out a few resources that may come in handy when working with NestJS:
+**Documentação Swagger**
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Acesse: http://localhost:3000/api/docs
 
-## Support
+**Endpoints Principais**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. **Fazer uma Pergunta**
+```bash
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "O que você sabe sobre Adam Smith?"
+  }'
+```
 
-## Stay in touch
+**Resposta**:
+```json
+{
+  "answer": "Adam Smith foi um economista escocês...",
+  "success": true,
+  "duration": 2500,
+  "timestamp": "2024-01-01T12:00:00.000Z"
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+2. **Verificar Estatísticas**
+```bash
+curl http://localhost:3000/api/v1/agent/stats
+```
 
-## License
+**Resposta**:
+```json
+{
+  "sqlite": {
+    "count": 2,
+    "databases": ["vendas.db", "clientes.db"]
+  },
+  "documents": {
+    "count": 3,
+    "files": ["manual.txt", "faq.md", "politicas.txt"]
+  },
+  "bash": {
+    "enabled": true
+  }
+}
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**3. Obter Sugestões**
+```bash
+curl http://localhost:3000/api/v1/agent/suggestions
+```
+
+**Resposta**:
+```json
+{
+  "suggestions": [
+    "Quem é Adam Smith?",
+    "Qual é a política de devolução?",
+    "Quantos clientes temos no banco de dados?"
+  ]
+}
+```
+
+### Exemplos de Perguntas
+**Para Documentos**
+```bash
+# Buscar informações específicas
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Qual é a política de férias da empresa?"}'
+
+# Buscar por pessoa ou conceito
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Me fale sobre economia clássica"}'
+```
+
+**Para Banco de Dados**
+```bash
+# Explorar estrutura
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Que tabelas existem no banco vendas.db?"}'
+
+# Consultar dados
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Quantos clientes temos cadastrados?"}'
+
+# Análises
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Quais foram as vendas do último mês?"}'
+```
+
+**Para Comandos Bash**
+```bash
+# Informações do sistema
+curl -X POST http://localhost:3000/api/v1/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Qual é a data e hora atual?"}'
+```
+
+### Histórico de Conversas (feature adicional)
+
+**Ver Histórico**
+```bash
+curl "http://localhost:3000/api/v1/history?limit=5"
+```
+
+**Buscar no Histórico**
+```bash
+curl http://localhost:3000/api/v1/history/stats
+```
+
+**Estatísticas do Histórico**
+```bash
+curl http://localhost:3000/api/v1/history/stats
+```
+
+### Chat em Tempo Real com WebSocket (feature adicional)
+
+**Conectar via JavaScript**
+```javascript
+const socket = io('http://localhost:3000');
+
+// Conectar
+socket.on('welcome', (data) => {
+  console.log('Conectado:', data.message);
+});
+
+// Enviar pergunta
+socket.emit('chat_message', {
+  query: 'O que você sabe sobre economia?'
+});
+
+// Receber resposta
+socket.on('chat_response', (response) => {
+  console.log('Resposta:', response.answer);
+});
+```
+
+### Configurações de Segurança
+```bash
+# Desabilitar comandos bash
+ENABLE_BASH_COMMANDS=false
+
+# Configurar CORS
+CORS_ORIGINS=http://localhost:3000,https://meusite.com
+
+# Rate limiting
+ENABLE_RATE_LIMITING=true
+RATE_LIMIT_MAX=60
+```
+
+### Configurações de Performance
+```bash 
+# Temperatura (0.0 = mais determinístico, 1.0 = mais criativo)
+OPENAI_TEMPERATURE=0.1
+
+# Máximo de tokens por resposta
+OPENAI_MAX_TOKENS=1500
+
+# Cache de respostas
+ENABLE_RESPONSE_CACHE=true
+CACHE_TTL=300
+```
+
+### Docker (feature adicional)
+
+**API REST**
+```bash
+docker build -t ai-agent-api .
+docker run -p 3000:3000 --env-file .env ai-agent-api
+```
+
+
